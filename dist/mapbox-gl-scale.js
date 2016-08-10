@@ -1,1 +1,114 @@
-!function t(n,o,r){function e(a,c){if(!o[a]){if(!n[a]){var l="function"==typeof require&&require;if(!c&&l)return l(a,!0);if(i)return i(a,!0);var p=new Error("Cannot find module '"+a+"'");throw p.code="MODULE_NOT_FOUND",p}var s=o[a]={exports:{}};n[a][0].call(s.exports,function(t){var o=n[a][1][t];return e(o?o:t)},s,s.exports,t,n,o,r)}return o[a].exports}for(var i="function"==typeof require&&require,a=0;a<r.length;a++)e(r[a]);return e}({1:[function(t,n,o){"use strict";function r(t){this.options=c({},this.options,t)}function e(t){var n=t._container.clientHeight/2,o=i(t.unproject([0,n]),t.unproject([100,n])),r=a(o),e=r/o;ruler.style.width=100*e+"px",ruler.innerHTML=1e3>r?r+" m":r/1e3+" km"}function i(t,n){var o=6371e3,r=Math.PI/180,e=t.lat*r,i=n.lat*r,a=Math.sin(e)*Math.sin(i)+Math.cos(e)*Math.cos(i)*Math.cos((n.lng-t.lng)*r),c=o*Math.acos(Math.min(a,1));return c}function a(t){var n=Math.pow(10,(Math.floor(t)+"").length-1),o=t/n;return o=o>=10?10:o>=5?5:o>=3?3:o>=2?2:1,n*o}if(!mapboxgl)throw new Error("include mapboxgl before mapbox-gl-scale.js");var c=t("xtend");r.prototype=mapboxgl.util.inherit(mapboxgl.Control,{options:{position:"top-right",zoom:16,flyTo:!0},onAdd:function(t){this.container=this.options.container?"string"==typeof this.options.container?document.getElementById(this.options.container):this.options.container:t.getContainer();var n=document.createElement("div");n.className="mapboxgl-ctrl-scale",n.id="ruler",this.container.appendChild(n),e(t),t.on("moveend",function(){e(t)})}}),window.mapboxgl?mapboxgl.Scale=r:"undefined"!=typeof n&&(n.exports=r)},{xtend:2}],2:[function(t,n,o){function r(){for(var t={},n=0;n<arguments.length;n++){var o=arguments[n];for(var r in o)e.call(o,r)&&(t[r]=o[r])}return t}n.exports=r;var e=Object.prototype.hasOwnProperty},{}]},{},[1]);
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
+/* global mapboxgl */
+if (!mapboxgl) throw new Error('include mapboxgl before mapbox-gl-scale.js');
+
+var extend = require('xtend');
+
+function Scale(options) {
+  this.options = extend({}, this.options, options);
+}
+
+Scale.prototype = mapboxgl.util.inherit(mapboxgl.Control, {
+
+  options: {
+    position: 'top-right',
+    zoom: 16,
+    flyTo: true
+  },
+
+
+  onAdd: function(map) {
+    this.container = this.options.container ?
+    typeof this.options.container === 'string' ?
+    document.getElementById(this.options.container) :
+    this.options.container :
+    map.getContainer();
+
+    var el = document.createElement('div');
+    el.className = 'mapboxgl-ctrl-scale';
+    el.id = 'ruler';
+
+    this.container.appendChild(el);
+
+    _updateScale(map);
+    map.on('moveend', function() {
+      _updateScale(map);
+    });
+
+    return el;
+  },
+
+});
+
+function _updateScale(map) {
+
+  var y = map._container.clientHeight / 2;
+
+
+  var maxMeters = _getDistance( map.unproject([0, y]), map.unproject([100, y]));
+
+  var meters = _getRoundNum(maxMeters);
+
+  var ratio = meters / maxMeters;
+
+  ruler.style.width = 100 * ratio + 'px';
+  ruler.innerHTML = meters < 1000 ? meters + ' m' : (meters / 1000) + ' km'; 
+
+}
+
+function _getDistance(latlng1, latlng2) {
+  var R = 6371000;
+
+  var rad = Math.PI / 180,
+      lat1 = latlng1.lat * rad,
+      lat2 = latlng2.lat * rad,
+      a = Math.sin(lat1) * Math.sin(lat2) +
+          Math.cos(lat1) * Math.cos(lat2) * Math.cos((latlng2.lng - latlng1.lng) * rad);
+
+  var maxMeters = R * Math.acos(Math.min(a, 1));
+  return maxMeters;
+
+}
+
+function _getRoundNum(num) {
+   var pow10 = Math.pow(10, (Math.floor(num) + '').length - 1),
+        d = num / pow10;
+
+    d = d >= 10 ? 10 :
+        d >= 5 ? 5 :
+        d >= 3 ? 3 :
+        d >= 2 ? 2 : 1;
+
+    return pow10 * d;
+}
+
+if (window.mapboxgl) {
+  mapboxgl.Scale = Scale;
+} else if (typeof module !== 'undefined') {
+  module.exports = Scale;
+}
+
+},{"xtend":2}],2:[function(require,module,exports){
+module.exports = extend
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+function extend() {
+    var target = {}
+
+    for (var i = 0; i < arguments.length; i++) {
+        var source = arguments[i]
+
+        for (var key in source) {
+            if (hasOwnProperty.call(source, key)) {
+                target[key] = source[key]
+            }
+        }
+    }
+
+    return target
+}
+
+},{}]},{},[1]);

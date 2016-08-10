@@ -36,6 +36,7 @@ Scale.prototype = mapboxgl.util.inherit(mapboxgl.Control, {
       _updateScale(map);
     });
 
+    return el;
   },
 
 });
